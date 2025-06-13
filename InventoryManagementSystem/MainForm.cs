@@ -40,7 +40,10 @@ namespace InventoryManagementSystem
 
         private void btnSuppliers_Click(object sender, EventArgs e)
         {
-            
+            this.Hide();
+            SupplierListForm form = new SupplierListForm();
+            form.FormClosed += (s, args) => this.Show();
+            form.Show();
         }
 
         private void btnProducts_Click(object sender, EventArgs e)
