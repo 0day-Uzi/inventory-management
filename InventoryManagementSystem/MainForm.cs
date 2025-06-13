@@ -48,7 +48,10 @@ namespace InventoryManagementSystem
 
         private void btnProducts_Click(object sender, EventArgs e)
         {
-            
+            this.Hide();
+            ProductListForm form = new ProductListForm();
+            form.FormClosed += (s, args) => this.Show();
+            form.Show();
         }
 
         private void btnOrders_Click(object sender, EventArgs e)
