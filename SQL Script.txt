@@ -1,0 +1,139 @@
+-- Create the database
+CREATE DATABASE IF NOT EXISTS inventory_management;
+USE inventory_management;
+
+-- Table: users (for login & roles, future feature)
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'manager') NOT NULL
+);
+
+-- Table: suppliers
+CREATE TABLE suppliers (
+    supplier_id INT AUTO_INCREMENT PRIMARY KEY,
+    supplier_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    email VARCHAR(100),
+    address VARCHAR(255)
+);
+
+-- Table: products
+CREATE TABLE products (
+    sku VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    supplier_id INT,
+    CONSTRAINT fk_supplier FOREIGN KEY (supplier_id)
+        REFERENCES suppliers(supplier_id)
+        ON DELETE SET NULL
+);
+
+-- Table: orders
+CREATE TABLE orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    supplier_id INT,
+    total_amount DECIMAL(10,2),
+    order_status ENUM('placed', 'received') DEFAULT 'placed',
+    CONSTRAINT fk_order_supplier FOREIGN KEY (supplier_id)
+        REFERENCES suppliers(supplier_id)
+        ON DELETE SET NULL
+);
+
+-- Table: order_items
+CREATE TABLE order_items (
+    order_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_sku VARCHAR(50) NOT NULL,
+    quantity INT NOT NULL,
+    price_each DECIMAL(10,2) NOT NULL,
+    CONSTRAINT fk_orderitem_order FOREIGN KEY (order_id)
+        REFERENCES orders(order_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_orderitem_product FOREIGN KEY (product_sku)
+        REFERENCES products(sku)
+        ON DELETE CASCADE
+);
+
+-- Table: stock_movements
+CREATE TABLE stock_movements (
+    movement_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_sku VARCHAR(50) NOT NULL,
+    movement_type ENUM('add', 'remove', 'adjust') NOT NULL,
+    quantity_changed INT NOT NULL,
+    movement_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    notes VARCHAR(255),
+    CONSTRAINT fk_movement_product FOREIGN KEY (product_sku)
+        REFERENCES products(sku)
+        ON DELETE CASCADE
+);
+
+-- Table: low_stock_alerts
+CREATE TABLE low_stock_alerts (
+    alert_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_sku VARCHAR(50),
+    alert_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    current_quantity INT,
+    CONSTRAINT fk_alert_product FOREIGN KEY (product_sku)
+        REFERENCES products(sku)
+        ON DELETE CASCADE
+);
+
+-- Trigger: On INSERT if quantity < 10
+DELIMITER //
+CREATE TRIGGER trg_low_stock_alert_insert
+AFTER INSERT ON products
+FOR EACH ROW
+BEGIN
+    IF NEW.quantity < 10 THEN
+        INSERT INTO low_stock_alerts (product_sku, current_quantity)
+        VALUES (NEW.sku, NEW.quantity);
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- Trigger: On UPDATE if quantity dropped below 10
+DELIMITER //
+CREATE TRIGGER trg_low_stock_alert_update
+AFTER UPDATE ON products
+FOR EACH ROW
+BEGIN
+    IF NEW.quantity < 10 AND OLD.quantity >= 10 THEN
+        INSERT INTO low_stock_alerts (product_sku, current_quantity)
+        VALUES (NEW.sku, NEW.quantity);
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- ====== SAMPLE DATA ======
+
+-- Insert admin and manager users
+INSERT INTO users (username, password, role) VALUES
+('admin', '123456', 'admin'),
+('manager', '123456', 'manager');
+
+-- Insert sample suppliers
+INSERT INTO suppliers (supplier_name, phone, email, address) VALUES
+('Prime Supplies Ltd.', '0712345678', 'info@primesupplies.com', 'No. 12, Main Street, Colombo'),
+('Green Leaf Traders', '0723456789', 'contact@greenleaf.lk', '45/A, Palm Avenue, Kandy'),
+('Oceanic Distributors', '0734567890', 'sales@oceanic.lk', '88 Marine Drive, Galle'),
+('Metro Wholesale Co.', '0745678901', 'support@metrowholesale.com', '22 Station Road, Negombo'),
+('Sunrise Importers', '0756789012', 'admin@sunriseimports.lk', '17 Sunrise Blvd, Jaffna');
+
+-- Insert sample products
+INSERT INTO products (sku, name, quantity, price, supplier_id) VALUES
+('PRD001', 'Premium Basmati Rice 5kg', 25, 1890.00, 1),
+('PRD002', 'Ceylon Black Tea Pack 200g', 50, 450.00, 2),
+('PRD003', 'Coconut Oil Bottle 1L', 15, 820.00, 3),
+('PRD004', 'Wheat Flour 1kg', 60, 190.00, 4),
+('PRD005', 'Red Lentils 500g', 8, 310.00, 2),
+('PRD006', 'Full Cream Milk Powder 400g', 45, 980.00, 1),
+('PRD007', 'Sunflower Cooking Oil 1L', 5, 1100.00, 3),
+('PRD008', 'Granulated White Sugar 1kg', 35, 250.00, 4),
+('PRD009', 'Green Mung Beans 500g', 9, 375.00, 5),
+('PRD010', 'Chili Powder 100g', 20, 190.00, 2);
