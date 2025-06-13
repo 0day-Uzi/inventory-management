@@ -103,7 +103,9 @@ namespace InventoryManagementSystem
 
             btnNavProducts.Click += (s, e) =>
             {
-                
+                ProductListForm productForm = new ProductListForm();
+                productForm.Show();
+                this.Close();
             };
 
             btnNavAddSupplier.Click += (s, e) =>
