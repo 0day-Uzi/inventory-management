@@ -63,7 +63,9 @@ namespace InventoryManagementSystem
 
         private void btnStockMovements_Click(object sender, EventArgs e)
         {
-            
+            this.Hide();
+            StockMovementForm form = new StockMovementForm();
+            form.Show();
         }
 
         private void btnLowStockAlerts_Click(object sender, EventArgs e)
