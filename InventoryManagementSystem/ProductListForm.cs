@@ -154,7 +154,9 @@ namespace InventoryManagementSystem
 
             btnNavOrders.Click += (s, e) =>
             {
-               
+                OrderForm form = new OrderForm(); 
+                form.Show();
+                this.Close();
             };
 
         }

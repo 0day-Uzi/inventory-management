@@ -56,7 +56,9 @@ namespace InventoryManagementSystem
 
         private void btnOrders_Click(object sender, EventArgs e)
         {
-            
+            OrderForm form = new OrderForm(); 
+            form.Show();
+            this.Close();
         }
 
         private void btnStockMovements_Click(object sender, EventArgs e)
