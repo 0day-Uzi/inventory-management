@@ -57,7 +57,9 @@ namespace InventoryManagementSystem
 
             btnNavAlerts.Click += (s, e) =>
             {
-                
+                this.Hide();
+                LowStockAlertForm form = new LowStockAlertForm();
+                form.Show();
             };
 
             btnNavMovements.Click += (s, e) => { };

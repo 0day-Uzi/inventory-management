@@ -70,7 +70,9 @@ namespace InventoryManagementSystem
 
         private void btnLowStockAlerts_Click(object sender, EventArgs e)
         {
-            
+            this.Hide();
+            LowStockAlertForm form = new LowStockAlertForm();
+            form.Show();
         }
 
         private void btnReports_Click(object sender, EventArgs e)
