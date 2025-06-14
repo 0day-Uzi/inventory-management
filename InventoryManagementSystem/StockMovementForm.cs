@@ -66,7 +66,9 @@ namespace InventoryManagementSystem
 
             btnNavReports.Click += (s, e) =>
             {
-                
+                this.Hide();
+                ViewReportsForm form = new ViewReportsForm();
+                form.Show();
             };
 
         }

@@ -77,7 +77,9 @@ namespace InventoryManagementSystem
 
         private void btnReports_Click(object sender, EventArgs e)
         {
-            
+            this.Hide();
+            ViewReportsForm form = new ViewReportsForm();
+            form.Show();
         }
     }
 }
